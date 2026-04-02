@@ -230,22 +230,37 @@ def main() -> None:
 			if series_data.empty:
 				st.info("No cleaned rows available for the selected characteristic.")
 			else:
-				line_chart = (
-					alt.Chart(series_data)
-					.mark_line(point=True)
-					.encode(
-						x=alt.X("ActivityStartDate:T", title="Time"),
-						y=alt.Y("ResultMeasureValue:Q", title="Measured value"),
-						color=alt.Color("MonitoringLocationIdentifier:N", title="Site"),
-						tooltip=[
-							alt.Tooltip("ActivityStartDate:T", title="Date"),
-							alt.Tooltip("MonitoringLocationIdentifier:N", title="Site"),
-							alt.Tooltip("ResultMeasureValue:Q", title="Measured value", format=".3f"),
-						],
-					)
-					.properties(height=420)
+				min_value = float(series_data["ResultMeasureValue"].min())
+				max_value = float(series_data["ResultMeasureValue"].max())
+				selected_range = st.slider(
+					"Measured value range",
+					min_value=min_value,
+					max_value=max_value,
+					value=(min_value, max_value),
 				)
-				st.altair_chart(line_chart, use_container_width=True)
+				series_data = series_data[
+					(series_data["ResultMeasureValue"] >= selected_range[0])
+					& (series_data["ResultMeasureValue"] <= selected_range[1])
+				]
+				if series_data.empty:
+					st.info("No rows match the selected measured value range.")
+				else:
+					line_chart = (
+						alt.Chart(series_data)
+						.mark_line(point=True)
+						.encode(
+							x=alt.X("ActivityStartDate:T", title="Time"),
+							y=alt.Y("ResultMeasureValue:Q", title="Measured value"),
+							color=alt.Color("MonitoringLocationIdentifier:N", title="Site"),
+							tooltip=[
+								alt.Tooltip("ActivityStartDate:T", title="Date"),
+								alt.Tooltip("MonitoringLocationIdentifier:N", title="Site"),
+								alt.Tooltip("ResultMeasureValue:Q", title="Measured value", format=".3f"),
+							],
+						)
+						.properties(height=420)
+					)
+					st.altair_chart(line_chart, use_container_width=True)
 		else:
 			st.info("No characteristics are available to plot.")
 
