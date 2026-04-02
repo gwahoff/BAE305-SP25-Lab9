@@ -3,3 +3,5 @@ folium
 pandas
 folium.plugins
 pathlib
+altair
+streamlit
