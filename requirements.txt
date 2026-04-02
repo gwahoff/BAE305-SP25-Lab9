@@ -1,1 +1,5 @@
-
+streamlit_folium
+folium
+pandas
+folium.plugins
+pathlib
